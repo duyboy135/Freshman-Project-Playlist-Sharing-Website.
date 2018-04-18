@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+
+  iframe(src="https://open.spotify.com/embed?uri=spotify:user:spotify:playlist:37i9dQZF1DXcBWIGoYBM5M" width="350" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media")
+
+  iframe(src="https://open.spotify.com/embed?uri=spotify:user:shelby.juhasz:playlist:3jjUWnJzVHqJgVNTFRTwV4" width="350" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media")
+
+  iframe(src="https://open.spotify.com/embed?uri=spotify:track:6Nle9hKrkL1wQpwNfEkxjh" width="350" height="380" frameborder="0" allowtransparency="true" allow="encrypted-media")
+
+  p The examples above show us using Spotify Play widgets to showcase an album, a user created playlist, and an individual song. The play buttons can be programmatically created with just a user ID and playlist ID.
