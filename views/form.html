@@ -1,0 +1,94 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'> <style>body {margin: 0;font-family: Arial, Helvetica, sans-serif;}.topnav { overflow: hidden; background-color: #333;}.topnav a {  float: right;color: #f2f2f2;text-align: center;padding: 14px 16px;text-decoration: none;font-size: 17px;}.topnav a:hover {background-color: #ddd;color: black;}.topnav a.active {background-color: #4CAF50;color: white;float:left;}a.active1 {background-color: #4CAF50;color: white;}</style></head><body><div class='topnav'><a class='active' href='/'>MyMelodies</a><a class='active1' href='/users'>Add Playlist</a><a class='active1' href='/account'>Account</a></div>
+<style type="text/css">
+body  {
+    background-image: url("https://png.pngtree.com/element_origin_min_pic/16/12/28/f4557e3dfcae6c6093e606567b6c3805.jpg");
+    background-color: #cccccc;
+}
+.form-style-6{
+    font: 95% Arial, Helvetica, sans-serif;
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 0px 16px 5px ;
+    background: #CDCDCD;
+}
+.form-style-6 h1{
+    background: #4CAF50;
+    padding: 20px;
+    font-size: 140%;
+    font-weight: 300;
+    text-align: center;
+    color: #fff;
+    margin: -16px -16px 16px -16px;
+}
+.form-style-6 input[type="text"],
+.form-style-6 input[type="date"],
+.form-style-6 input[type="datetime"],
+.form-style-6 input[type="email"],
+.form-style-6 input[type="number"],
+.form-style-6 input[type="search"],
+.form-style-6 input[type="time"],
+.form-style-6 input[type="url"],
+.form-style-6 textarea,
+.form-style-6 select 
+{
+    -webkit-transition: all 0.30s ease-in-out;
+    -moz-transition: all 0.30s ease-in-out;
+    -ms-transition: all 0.30s ease-in-out;
+    -o-transition: all 0.30s ease-in-out;
+    outline: none;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    width: 100%;
+    background: #fff;
+    margin-bottom: 4%;
+    border: 1px solid #ccc;
+    padding: 2%;
+    color: #555;
+    font: 95% Arial, Helvetica, sans-serif;
+}
+.form-style-6 input[type="text"]:focus,
+.form-style-6 input[type="date"]:focus,
+.form-style-6 input[type="datetime"]:focus,
+.form-style-6 input[type="email"]:focus,
+.form-style-6 input[type="number"]:focus,
+.form-style-6 input[type="search"]:focus,
+.form-style-6 input[type="time"]:focus,
+.form-style-6 input[type="url"]:focus,
+.form-style-6 textarea:focus,
+.form-style-6 select:focus
+{
+    box-shadow: 0 0 5px #4CAF50;
+    padding: 3%;
+    border: 1px solid #4CAF50;
+}
+
+.form-style-6 input[type="submit"],
+.form-style-6 input[type="button"]{
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    width: 100%;
+    padding: 3%;
+    background: #4CAF50;
+    border-bottom: 2px solid #30C29E;
+    border-top-style: none;
+    border-right-style: none;
+    border-left-style: none;    
+    color: #fff;
+}
+.form-style-6 input[type="submit"]:hover,
+.form-style-6 input[type="button"]:hover{
+    background: #2EBC99;
+}
+</style>
+<div class="form-style-6">
+<h1>Please enter a valid playlist_id and user_id to add a new playlist</h1>
+<form action = "/add" method = "post">
+<input type="text" name="user_id" placeholder="User_id" />
+<input type="text" name="playlist_id" placeholder="Playlist_id" />
+<input type="submit" value="Submit" />
+</form>
+</div>
+
+

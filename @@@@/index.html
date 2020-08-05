@@ -1,0 +1,202 @@
+<!doctype html>
+<html>
+  <head>
+      <meta name='viewport' content='width=device-width, initial-scale=1'> <style>body {margin: 0;font-family: Arial, Helvetica, sans-serif;}.topnav { overflow: hidden; background-color: #333;}.topnav a {  float: right;color: #f2f2f2;text-align: center;padding: 14px 16px;text-decoration: none;font-size: 17px;}.topnav a:hover {background-color: #ddd;color: black;}.topnav a.active {background-color: #4CAF50;color: white;float:left;}a.active1 {background-color: #4CAF50;color: white;}</style></head><body><div class='topnav'><a class='active' href='http://localhost'>MyMelodies</a><a class='active1' href='http://localhost/users'>Add Playlist</a><a class='active1' href='http://localhost/account'>Account</a></div>
+    <title>Link Account
+      </title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <style type="text/css">
+      #login, #loggedin {
+        display: none;
+      }
+      .text-overflow {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 500px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div id="login">
+          
+        <h1>Redirecting to Spotify</h1>
+          
+        <a href="/login" class="btn btn-primary">Log in with Spotify</a>
+      </div>
+      <div id="loggedin">
+        <div id="user-profile">
+        </div>
+        <div id="oauth">
+        </div>
+        <button class="btn btn-default" id="obtain-new-token">Obtain new token using the refresh token</button>
+      </div>
+    </div>
+
+    <script id="user-profile-template" type="text/x-handlebars-template">
+    <a href="http://localhost:80">Home</a> 
+      <h1>Logged in as {{display_name}}</h1>
+      <div class="media">
+        <div class="pull-left">
+          <img class="media-object" width="150" src="{{images.0.url}}" />
+        </div>
+        <div class="media-body">
+          <dl class="dl-horizontal">
+            <dt>Display name</dt><dd class="clearfix">{{display_name}}</dd>
+            <dt>URI</dt><dd>{{uri}}</dd>
+            
+            
+                
+            <dd class="clearfix"></dd>
+            
+            
+            <dt>Playlist 1</dt><dd>
+            <div id="div1"><h2></h2></div>
+            <dt>Playlist 2</dt><dd>
+            <div id="div2"><h2></h2></div>
+            <dt>Playlist 3</dt><dd>
+            <div id="div3"><h2></h2></div>
+            <dt>Playlist 4</dt><dd>
+            <div id="div4"><h2></h2></div>
+            <dt>Playlist 5</dt><dd>
+            <div id="div5"></div>
+            
+             
+              
+              
+            
+            
+          </dl>
+        </div>
+      </div>
+            
+
+
+
+
+</script>
+      
+      
+      
+      
+    
+      
+    <script id="oauth-template" type="text/x-handlebars-template">
+      <h2>oAuth info</h2>
+      <dl class="dl-horizontal">
+        <dt>Access token</dt><dd>{{access_token}}</dd>
+        <dt>Refresh token</dt><dd>{{refresh_token1}}</dd>
+      </dl>
+    </script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script>
+        
+      (function() {
+
+        /**
+         * Obtains parameters from the hash of the URL
+         * @return Object
+         */
+        function getHashParams() {
+          var hashParams = {};
+          var e, r = /([^&;=]+)=?([^&;]*)/g,
+              q = window.location.hash.substring(1);
+          while ( e = r.exec(q)) {
+             hashParams[e[1]] = decodeURIComponent(e[2]);
+          }
+          return hashParams;
+        }
+
+        var userProfileSource = document.getElementById('user-profile-template').innerHTML,
+            userProfileTemplate = Handlebars.compile(userProfileSource),
+            userProfilePlaceholder = document.getElementById('user-profile');
+
+        var oauthSource = document.getElementById('oauth-template').innerHTML,
+            oauthTemplate = Handlebars.compile(oauthSource),
+            oauthPlaceholder = document.getElementById('oauth');
+
+        var params = getHashParams();
+
+        var access_token = params.access_token,
+            refresh_token = params.refresh_token,
+            error = params.error;
+
+        if (error) {
+          alert('There was an error during the authentication');
+        } else {
+          if (access_token) {
+            // render oauth info
+            oauthPlaceholder.innerHTML = oauthTemplate({
+              access_token: access_token,
+              refresh_token1: refresh_token
+            });
+
+            $.ajax({
+                url: 'https://api.spotify.com/v1/me',
+                headers: {
+                  'Authorization': 'Bearer ' + access_token
+                },
+                success: function(response) {
+                    
+                  userProfilePlaceholder.innerHTML = userProfileTemplate(response);
+                    
+                  $('#login').hide();
+                  $('#loggedin').show();
+                }
+            });
+              $.ajax({
+                url: 'https://api.spotify.com/v1/me/playlists',
+                headers: {
+                  'Authorization': 'Bearer ' + access_token
+                },
+                success: function(result) {
+                    
+                  
+                $("#div1").html(result.items[0].name);
+                $("#div2").html(result.items[1].name);
+                $("#div3").html(result.items[2].name);
+                $("#div4").html(result.items[3].name);
+                $("#div5").html(result.items[4].name);
+                    uri: result.items[0].uri
+                    
+                
+            
+                  $('#login').hide();
+                  $('#loggedin').show();
+                }
+            });
+             
+          } else {
+              // render initial screen
+              $('#login').show();
+              $('#loggedin').hide();
+          }
+          document.getElementById('obtain-new-token').addEventListener('click', function() {
+            $.ajax({
+              url: '/refresh_token',
+              data: {
+                'refresh_token': refresh_token
+              }
+            }).done(function(data) {
+              access_token = data.access_token;
+              oauthPlaceholder.innerHTML = oauthTemplate({
+                access_token: access_token,
+                refresh_token: refresh_token
+              });
+            });
+          }, false);
+        }
+      })();
+        
+        
+
+        
+        
+    </script>
+  </body>
+</html>
+

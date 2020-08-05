@@ -4,130 +4,101 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var level = require('level')
 var url = require('url')
 var request = require('request');
+const format = require('string-format');
+var session = require('client-sessions');
+var querystring = require('querystring');
+var playlists_manager = require('./include/playlists_manager.js');
 //var index = require('./routes/index');
 //var users = require('./routes/users');
 
-var db = level('./mydb')
 var app = express();
 var fs = require('fs');
-var user_id = ["shelby.juhasz", "eo1vnjc69ocrkarwna4azf1xy"];
-var playlist_id = ["3jjUWnJzVHqJgVNTFRTwV4", "2dgB4Q51GNkX9gKjzHB7Zi"];
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
+
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(session({
+  cookieName: 'session',
+  secret: 'sadasdasdasd',
+  duration: 30*60*1000,
+  activeDuration: 5*60*1000
+}));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//app.use('/', index);
-//app.use('/users', users);
 
-var option = 'width="350" height="280" frameborder="0" allowtransparency="true" allow="encrypted-media"> </iframe>';
-var cell_option = '<td align = "center" width = "350px" height = "150px">';
-var cell_option_first_line = '<td align = "center" width = "350px" height = "50px">';
-function getLink(_user_id, _playlist_id){
-	return '<iframe src="https://open.spotify.com/embed?uri=spotify:user:' + _user_id + ':playlist:' + _playlist_id + '" ' + option;
-}
-
-app.get('/', function(req, res, next) {
-	//res.render('index', { title: 'Spotify Playlist Viewer' });
-  var response = '<html>';
-  response += '<h1> WELCOME TO TEAM 22 CI-PROTOTYPE </h1>';
-  response += '<h2> YOU CAN ADD NEW SPOTIFY PLAYLIST BY CLICKING TO THIS LINK <a href="/users">ADD NEW PLAYLIST</a> </h2>';
-  response += '<h2> HERE IS THE PLAYLIST TABLE </h2>';
-  response +=  '<br></br> <table border = "1" align = "left">';
- 	response += '<tr>' + cell_option_first_line + '<font size="4"> ID  </font></td>' + cell_option_first_line +  '<font size="4"> PLAYLIST </font></td>';
-  response += cell_option_first_line + '<font size="4"> PLAYLIST_INFORMATION </font></td> </tr>' 
-  len = user_id.length;
-  for(var i = 0; i < len ; i++){ 
-  	response += '<tr>';
-  	response += (cell_option + '<font size="5"> #' + (i + 1).toString() + '</font></td>');
-  	response += (cell_option +  getLink(user_id[i], playlist_id[i])  + '</td>');
-    response += (cell_option + '<a href = "/info?user_id='  + user_id[i] + '&playlist_id=' + playlist_id[i]) + '"> <font size="3"> CLICK HERE FOR MORE INFORMATION OF THIS PLAYLIST </font></td>' ;
-  	response += '</tr>';
-  }		
-  response += '</table>';
-  response += '</html>';
-  res.send(response);
-
+//Database create//
+/*
+var mysql = require('mysql')
+var con = mysql.createConnection({
+  host: 'twilbury.cs.drexel.edu',
+  user: 'dj458',
+  password: 'oiskfulao',
+  database: 'dj458_info152_201702'
 });
+*/
 
-/*---------------------------------------------------------------------------------------------------------------*/
-headers = {
-    'Accept': 'application/json',
-    'Authorization': 'Bearer BQDBy4m_cVXnGXkI7mAi0Dv5OMDfwP0nQcYWbRIYrp9tKiYUxAZigf_WSLH2nRax33U5Q2WaX6mUAk1wyahYlPIRfXStByrbpP0Ir8BLmTAPp19wKzvjedynF-dXA7vUqH5lVUDKQ0MPLW-4RzYp3du5o9Hw8PhMVQ',
-}
+var con = require('./database/sql.js').con;
 
-var options = {
-    url: '',
-    headers: headers
-};
 
-app.get('/info', function(req, res, next) {
-  var req_data = url.parse(req.url, true).query
-  var response = '<html>'
-  options.url = 'https://api.spotify.com/v1/users/' + req_data.user_id + '/playlists/' + req_data.playlist_id + '?fields=tracks(items(track(artists(name),album(name),duration_ms))),name,owner(display_name)';
-  request(options, function(err, _res, body) {  
-    var data = JSON.parse(body);
-    console.log(data);
-    var playlist_name = data.name;
-    var owner_name = data.owner.display_name;
-    response += '<h3> PLAYLIST NAME: ' + playlist_name + '</h3>';
-    response += '<h3> This playlis is created by ' + owner_name + '</h3>';
-    console.log('good');
-    var all_items = data.tracks.items;
-    console.log(data.tracks);
+/*ROUTER*/
 
-    /*Cal total time**/
-    var total_time = 0;
-    var len = all_items.length;
-    for(var i = 0 ; i < len ; i++)
-      total_time += all_items[i].track.duration_ms;
-    /*-------------*/
-    total_time = Math.floor(total_time/1000);
-    minutes = Math.floor(total_time/60);
-    seconds = total_time - minutes*60;
-    response += '<h3> The total length of this playlist is ' + minutes.toString() + ' minutes and ' + seconds.toString() + ' seconds' + '</h3>';
-       response += '<a href = "/" <font size="3"> CLICK HERE TO GO BACK TO THE MAIN PAGE </font></td>';
-       response += '</html>';
-       res.send(response);
-  } );
-});
-
-app.get('/users', function(req, res, next) {
-  res.sendFile(path.join(__dirname + '/form.html'));
-});
-
-app.post('/add', function(req, res, next){
-	options.url = 'https://api.spotify.com/v1/users/' + req.body.user_id + '/playlists/' + req.body.playlist_id + '?fields=name';
-  request(options, function(err, _res, body) {  
-    var data = JSON.parse(body);
-    console.log(data);
-    if (typeof data.error === "undefined"){
-      res.redirect('/success');
-      user_id.push(req.body.user_id);
-      playlist_id.push(req.body.playlist_id);
-    }
-    else
-      res.redirect('/failure');
-  });
-});
-
+var index = require('./routes/index.js');
+app.use('/', index);
+var users = require('./routes/users.js');
+app.use('/', users);
+var login = require('./routes/login.js');
+app.use('/', login);
+var likes = require('./routes/like.js');
+app.use('/', likes);
+var account = require('./routes/account.js');
+app.use('/', account);
+var info = require('./routes/get_info.js');
+app.use('/', info);
+var register = require('./routes/register.js');
+app.use('/', register);
 app.get('/success', function(req, res, next) {
-  res.sendFile(path.join(__dirname + '/success.html'));
+  res.sendFile(path.join(__dirname + '/views/success.html'));
 });
 
 app.get('/failure', function(req, res, next) {
-  res.sendFile(path.join(__dirname + '/failure.html'));
+  res.sendFile(path.join(__dirname + '/views/failure.html'));
 });
+app.get('/duplicate', function(req, res, next) {
+  res.sendFile(path.join(__dirname + '/views/duplicate.html'));
+});
+app.get('/login_page', function(req, res ,next){
+  res.sendFile(path.join(__dirname + '/views/login.html'));
+});
+app.get('/authentication_fail', function(req, res ,next){
+  res.sendFile(path.join(__dirname + '/views/authentication_fail.html'));
+});
+app.get('/mutiple_like', function(req, res, next){
+  res.sendFile(path.join(__dirname + '/views/mutiple_like.html'));
+});
+app.get('/logout',function(req,res,next){
+  req.session.username = null;
+  res.redirect('/');
+});
+
+app.get('/register_page', function(req, res,next){
+  if(req.session.username == null)
+      res.sendFile(path.join(__dirname + '/views/register_page.html'));
+  else 
+      res.redirect('/');
+});
+app.get('/users', function(req, res, next) {
+  if (req.session.username == null)
+    res.redirect('/authentication_fail');
+  res.sendFile(path.join(__dirname + '/views/form.html'));
+});
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
